@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MockTest Marks Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 1.8rem;
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            color: #555;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        input[type="number"], output {
+            width: 100%;
+            padding: 1px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .results h2 {
+            margin: 0 0 10px;
+            color: #333;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .results span {
+            display: block;
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #444;
+        }
+        .positive {
+            color: #4CAF50;
+        }
+        .negative {
+            color: #f44336;
+        }
+        .accuracy {
+            color: #2196F3;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            label {
+                font-size: 0.9rem;
+            }
+            input[type="number"], output {
+                font-size: 0.9rem;
+            }
+            .results h2 {
+                font-size: 1.3rem;
+            }
+            .results span {
+                font-size: 0.9rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mock Score</h1>
+        <label for="total-questions">Total Questions</label>
+        <input type="number" id="total-questions" placeholder="Enter total questions" min="1">
+
+        <label for="attempted-questions">Attempted Questions</label>
+        <input type="number" id="attempted-questions" placeholder="Enter attempted questions" min="0">
+
+        <label for="correct-answers">Correct Answers (<span id="correct-count">0</span>)</label>
+        <input type="range" id="correct-answers" min="0" value="0">
+
+        <label for="cutoff">Cutoff Marks</label>
+        <input type="number" id="cutoff" placeholder="Enter cutoff marks" min="0">
+
+        <div class="results" id="results" style="display:none;">
+            <h2>Results</h2>
+            <span>Positive Marks: <output id="positive-marks" class="positive">0</output></span>
+            <span>Negative Marks: <output id="negative-marks" class="negative">0</output></span>
+            <span>Total Marks: <output id="total-marks">0</output></span>
+            <span>Incorrect Questions: <output id="incorrect-questions">0</output></span>
+            <span>Additional Questions Needed to Reach Cutoff: <output id="additional-questions">0</output></span>
+            <span>Accuracy: <output id="accuracy" class="accuracy">0</output>%</span>
+        </div>
+    </div>
+
+    <script>
+        const totalQuestionsInput = document.getElementById('total-questions');
+        const attemptedQuestionsInput = document.getElementById('attempted-questions');
+        const correctAnswersInput = document.getElementById('correct-answers');
+        const correctCountDisplay = document.getElementById('correct-count');
+        const cutoffInput = document.getElementById('cutoff');
+
+        correctAnswersInput.addEventListener('input', () => {
+            correctCountDisplay.textContent = correctAnswersInput.value;
+            calculateScore();
+        });
+
+        attemptedQuestionsInput.addEventListener('input', () => {
+            const attemptedQuestions = parseInt(attemptedQuestionsInput.value) || 0;
+            correctAnswersInput.max = attemptedQuestions;
+            calculateScore();
+        });
+
+        totalQuestionsInput.addEventListener('input', () => {
+            calculateScore();
+        });
+
+        cutoffInput.addEventListener('input', () => {
+            calculateScore();
+        });
+
+        function calculateScore() {
+            const totalQuestions = parseInt(totalQuestionsInput.value) || 0;
+            const attemptedQuestions = parseInt(attemptedQuestionsInput.value) || 0;
+            const correctAnswers = parseInt(correctAnswersInput.value) || 0;
+            const cutoff = parseFloat(cutoffInput.value) || 0;
+
+            if (totalQuestions < attemptedQuestions) {
+                alert('Attempted questions cannot exceed total questions.');
+                return;
+            }
+
+            if (correctAnswers > attemptedQuestions) {
+                alert('Correct answers cannot exceed attempted questions.');
+                return;
+            }
+
+            const incorrectAnswers = attemptedQuestions - correctAnswers;
+            const positiveMarks = correctAnswers * 2;
+            const negativeMarks = incorrectAnswers * 0.66;
+            const totalMarks = positiveMarks - negativeMarks;
+
+            let additionalQuestionsNeeded = 0;
+            if (cutoff > totalMarks) {
+                let marksNeeded = cutoff - totalMarks;
+                while (marksNeeded > 0) {
+                    additionalQuestionsNeeded++;
+                    marksNeeded -= (2 + 0.66); // Adding 2 marks and removing 0.66 from negative marking
+                }
+            }
+
+            const accuracy = (attemptedQuestions > 0) ? ((correctAnswers / attemptedQuestions) * 100).toFixed(2) : 0;
+
+            document.getElementById('positive-marks').value = positiveMarks.toFixed(2);
+            document.getElementById('negative-marks').value = negativeMarks.toFixed(2);
+            document.getElementById('total-marks').value = totalMarks.toFixed(2);
+            document.getElementById('incorrect-questions').value = incorrectAnswers;
+            document.getElementById('additional-questions').value = additionalQuestionsNeeded;
+            document.getElementById('accuracy').value = accuracy;
+
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
